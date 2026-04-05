@@ -88,7 +88,6 @@ class GameFormViewModel @Inject constructor(
     private fun submitForm() {
         val currentState = _uiState.value
 
-        // Validaciones
         if (currentState.name.isBlank()) {
             _uiState.update {
                 it.copy(errorMessage = "El nombre del juego es requerido")
@@ -135,7 +134,6 @@ class GameFormViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
-                    // El dialog se cerrará desde la UI
                 },
                 onFailure = { error ->
                     hapticFeedback.vibrateError()

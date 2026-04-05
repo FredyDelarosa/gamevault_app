@@ -3,13 +3,12 @@ package com.fredy.gamevault.features.dashboard.presentation.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Delete
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fredy.gamevault.core.hardware.HapticFeedback
 import com.fredy.gamevault.features.dashboard.presentation.viewmodels.DashboardViewModel
@@ -58,13 +57,13 @@ fun DashboardScreen(
                         onLogout()
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Logout,
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Cerrar Sesión",
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
@@ -155,7 +154,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Snackbar para mensajes
             if (uiState.successMessage != null) {
                 LaunchedEffect(uiState.successMessage) {
                     kotlinx.coroutines.delay(2000)
@@ -177,7 +175,6 @@ fun DashboardScreen(
         }
     }
 
-    // Dialog para crear/editar juegos
     if (showGameForm) {
         GameFormDialog(
             gameId = editingGameId,

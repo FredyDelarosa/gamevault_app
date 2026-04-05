@@ -142,7 +142,6 @@ fun BacklogScreen(
                 }
             }
 
-            // Snackbar para mensajes
             if (uiState.successMessage != null) {
                 LaunchedEffect(uiState.successMessage) {
                     delay(2000)
@@ -164,7 +163,6 @@ fun BacklogScreen(
         }
     }
 
-    // Dialog para crear/editar juegos
     if (showGameForm) {
         GameFormDialog(
             gameId = editingGameId,

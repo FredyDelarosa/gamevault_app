@@ -10,14 +10,12 @@ import retrofit2.http.*
 
 interface GameVaultApi {
 
-    // Auth endpoints
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
 
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
-    // Game endpoints (protegidos)
     @GET("games")
     suspend fun getGames(@Query("status") status: String? = null): List<GameResponse>
 

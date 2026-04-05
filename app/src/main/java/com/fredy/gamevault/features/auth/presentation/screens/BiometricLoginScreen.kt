@@ -42,7 +42,6 @@ fun BiometricLoginScreen(
     } else {
         when (biometricAvailability) {
             BiometricAvailability.AVAILABLE -> {
-                // Mostrar diálogo de autenticación automáticamente
                 LaunchedEffect(activity) {
                     biometricManager.showBiometricPrompt(
                         activity = activity,
@@ -64,7 +63,6 @@ fun BiometricLoginScreen(
                 }
             }
             else -> {
-                // No disponible, mostrar mensaje
                 LaunchedEffect(Unit) {
                     errorMessage = when (biometricAvailability) {
                         BiometricAvailability.NO_HARDWARE -> "Este dispositivo no tiene sensor de huellas"
@@ -150,7 +148,6 @@ fun BiometricLoginScreen(
         }
     }
 
-    // Prevenir que el botón de retroceso cierre la app sin manejar
     BackHandler(enabled = true) {
         onDismiss()
     }

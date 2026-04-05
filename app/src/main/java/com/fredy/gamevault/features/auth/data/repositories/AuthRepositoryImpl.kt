@@ -25,7 +25,6 @@ class AuthRepositoryImpl @Inject constructor(
             val user = response.user.toDomain()
             val token = response.token
 
-            // Guardar sesión
             sessionManager.saveAuthToken(token)
             sessionManager.saveUserSession(user.id, user.email, user.firstName, user.lastName)
 

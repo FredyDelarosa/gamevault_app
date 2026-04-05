@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fredy.gamevault.core.navigation.GameVaultBottomBar
 import com.fredy.gamevault.core.navigation.NavGraph
@@ -44,10 +45,11 @@ fun GameVaultApp(
 ) {
     val isLoggedIn by sessionManager.isLoggedIn().collectAsStateWithLifecycle(initialValue = false)
     val useBiometricEnabled by sessionManager.useBiometricEnabled.collectAsStateWithLifecycle(initialValue = false)
-    val isBiometricGateRequired = isLoggedIn && useBiometricEnabled
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    val startDestination = if (isLoggedIn && !isBiometricGateRequired) {
+    val startDestination = if (isLoggedIn && !useBiometricEnabled) {
         Screen.Dashboard.route
     } else {
         Screen.Login.route
@@ -55,7 +57,7 @@ fun GameVaultApp(
 
     Scaffold(
         bottomBar = {
-            if (isLoggedIn && !isBiometricGateRequired) {
+            if (isLoggedIn && currentRoute in setOf(Screen.Dashboard.route, Screen.Backlog.route)) {
                 GameVaultBottomBar(
                     navController = navController,
                     onNavigateToDashboard = {

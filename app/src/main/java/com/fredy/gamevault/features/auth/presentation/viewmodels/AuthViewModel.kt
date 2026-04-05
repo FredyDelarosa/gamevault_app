@@ -35,7 +35,6 @@ class AuthViewModel @Inject constructor(
                 onSuccess = { pair ->
                     hapticFeedback.vibrateSuccess()
 
-                    // Persist biometric preference only when the user opted in on this login.
                     if (useBiometric) {
                         sessionManager.setUseBiometric(true)
                     }
@@ -66,7 +65,6 @@ class AuthViewModel @Inject constructor(
             val token = sessionManager.getToken()
             if (token != null) {
                 hapticFeedback.vibrateSuccess()
-                // Existing session token allows biometric shortcut login.
                 onSuccess()
             } else {
                 hapticFeedback.vibrateError()

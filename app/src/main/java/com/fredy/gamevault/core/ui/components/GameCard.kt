@@ -48,7 +48,6 @@ fun GameCard(
                         .padding(end = 12.dp),
                     contentScale = ContentScale.Crop,
                     onError = {
-                        // Error cargando imagen
                     }
                 )
             }
@@ -73,7 +72,6 @@ fun GameCard(
                     )
                 }
             }
-            // Aquí se pueden añadir botones de editar/eliminar
         }
     }
 }

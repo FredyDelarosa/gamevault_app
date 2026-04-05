@@ -71,9 +71,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(libs.androidx.lifecycle.viewmodel.compose)   //viewModel()
-    implementation(libs.com.squareup.retrofit2.retrofit)        // Retrofit
-    implementation(libs.com.squareup.retrofit2.converter.json)  // JSON
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.com.squareup.retrofit2.retrofit)
+    implementation(libs.com.squareup.retrofit2.converter.json)
     implementation(libs.io.coil.kt.coil.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.room.runtime)
@@ -86,8 +86,8 @@ dependencies {
     implementation(libs.androidx.compose.remote.creation.core)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.material3)
-    implementation(libs.hilt.android)                               // Implementación de Hilt
-    implementation(libs.hilt.navigation.compose)                    // Integración con Jetpack Compose
-    ksp(libs.hilt.compiler)                               // Implementación de Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
     ksp(libs.androidx.room.compiler)
 }

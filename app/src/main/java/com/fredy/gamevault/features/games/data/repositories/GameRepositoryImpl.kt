@@ -23,7 +23,6 @@ class GameRepositoryImpl @Inject constructor(
 
     override suspend fun getGames(status: GameStatus?): Result<List<Game>> {
         return try {
-            // Intentar obtener de la API
             val statusString = status?.let {
                 when (it) {
                     GameStatus.NOW_PLAYING -> "NOW_PLAYING"
@@ -34,7 +33,6 @@ class GameRepositoryImpl @Inject constructor(
             val response = api.getGames(statusString)
             val games = response.map { it.toRemoteDomain() }
 
-            // Guardar en Room
             val userId = getCurrentUserId()
             games.forEach { game ->
                 if (game.userId == userId) {
@@ -44,7 +42,6 @@ class GameRepositoryImpl @Inject constructor(
 
             Result.success(games)
         } catch (e: Exception) {
-            // Si falla la API, obtener de Room
             val userId = getCurrentUserId()
             val localGames = if (status != null) {
                 gameDao.getGamesByStatus(
@@ -71,7 +68,6 @@ class GameRepositoryImpl @Inject constructor(
             val response = api.getGameById(id)
             val game = response.toRemoteDomain()
 
-            // Actualizar Room
             gameDao.insertGame(game.toEntity(isSynced = true))
 
             Result.success(game)
@@ -107,12 +103,10 @@ class GameRepositoryImpl @Inject constructor(
             )
             val game = response.toRemoteDomain()
 
-            // Guardar en Room
             gameDao.insertGame(game.toEntity(isSynced = true))
 
             Result.success(game)
         } catch (_: Exception) {
-            // Crear juego local para sincronizar después
             val userId = getCurrentUserId()
             val localGame = Game(
                 id = java.util.UUID.randomUUID().toString(),
@@ -157,7 +151,6 @@ class GameRepositoryImpl @Inject constructor(
             val response = api.updateGame(id, gameDto)
             val game = response.toRemoteDomain()
 
-            // Actualizar Room
             gameDao.updateGame(game.toEntity(isSynced = true))
 
             Result.success(game)
@@ -197,20 +190,17 @@ class GameRepositoryImpl @Inject constructor(
                 Result.failure(Exception(response.message))
             }
         } catch (_: Exception) {
-            // Marcar para eliminar localmente
             gameDao.deleteGameById(id)
             Result.success(Unit)
         }
     }
 
-    // Función para sincronizar juegos pendientes
     suspend fun syncPendingGames(): Result<Unit> {
         val unsyncedGames = gameDao.getUnsyncedGames()
         for (gameEntity in unsyncedGames) {
             try {
                 val game = gameEntity.toDomain()
 
-                // Si existe en backend, se actualiza; si no existe (404), se crea.
                 val existsInBackend = try {
                     api.getGameById(game.id)
                     true
@@ -228,14 +218,12 @@ class GameRepositoryImpl @Inject constructor(
                 } else {
                     val createdGame = api.createGame(game.toDto()).toRemoteDomain()
 
-                    // Si era un registro local temporal, reemplazarlo por el ID real del servidor.
                     if (createdGame.id != game.id) {
                         gameDao.deleteGameById(game.id)
                     }
                     gameDao.insertGame(createdGame.toEntity(isSynced = true))
                 }
             } catch (_: Exception) {
-                // Continuar con el siguiente
             }
         }
         return Result.success(Unit)

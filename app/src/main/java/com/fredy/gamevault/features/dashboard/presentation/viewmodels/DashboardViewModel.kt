@@ -59,7 +59,7 @@ class DashboardViewModel @Inject constructor(
             val result = markGameAsCompletedUseCase(gameId, true)
 
             result.fold(
-                onSuccess = { game ->
+                onSuccess = { _ ->
                     hapticFeedback.vibrateSuccess()
                     _uiState.update {
                         it.copy(
@@ -67,7 +67,7 @@ class DashboardViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
-                    loadNowPlayingGames() // Recargar lista
+                    loadNowPlayingGames()
                 },
                 onFailure = { error ->
                     hapticFeedback.vibrateError()
@@ -86,7 +86,7 @@ class DashboardViewModel @Inject constructor(
             val result = moveGameToBacklogUseCase(gameId)
 
             result.fold(
-                onSuccess = { game ->
+                onSuccess = { _ ->
                     hapticFeedback.vibrate()
                     _uiState.update {
                         it.copy(
@@ -94,7 +94,7 @@ class DashboardViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
-                    loadNowPlayingGames() // Recargar lista
+                    loadNowPlayingGames()
                 },
                 onFailure = { error ->
                     hapticFeedback.vibrateError()
@@ -121,7 +121,7 @@ class DashboardViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
-                    loadNowPlayingGames() // Recargar lista
+                    loadNowPlayingGames()
                 },
                 onFailure = { error ->
                     hapticFeedback.vibrateError()

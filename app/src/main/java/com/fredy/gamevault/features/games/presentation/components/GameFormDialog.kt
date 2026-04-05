@@ -42,14 +42,12 @@ fun GameFormDialog(
         HapticFeedback(context)
     }
 
-    // Cargar juego si estamos en modo edición
     LaunchedEffect(gameId) {
         if (gameId != null && gameId != "new") {
             viewModel.handleEvent(GameFormEvent.LoadGame(gameId))
         }
     }
 
-    // Observar éxito para cerrar el dialog
     LaunchedEffect(uiState.isLoading) {
         if (hasSubmitted && !uiState.isLoading && uiState.errorMessage == null && uiState.name.isNotBlank()) {
             onSuccess()
@@ -83,13 +81,11 @@ fun GameFormDialog(
                         .padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Vista previa de imagen y botón de cámara
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Vista previa de imagen
                         if (uiState.coverImageUrl.isNotBlank()) {
                             Image(
                                 painter = rememberAsyncImagePainter(uiState.coverImageUrl),
@@ -100,7 +96,6 @@ fun GameFormDialog(
                             )
                         }
 
-                        // Botón de cámara
                         OutlinedButton(
                             onClick = {
                                 hapticFeedback.vibrateTick()
@@ -118,7 +113,6 @@ fun GameFormDialog(
                         }
                     }
 
-                    // Campo Nombre
                     GameVaultTextField(
                         value = uiState.name,
                         onValueChange = { viewModel.handleEvent(GameFormEvent.NameChanged(it)) },
@@ -127,7 +121,6 @@ fun GameFormDialog(
                         isError = uiState.errorMessage != null && uiState.name.isBlank()
                     )
 
-                    // Campo Descripción
                     GameVaultTextField(
                         value = uiState.description,
                         onValueChange = { viewModel.handleEvent(GameFormEvent.DescriptionChanged(it)) },
@@ -135,7 +128,6 @@ fun GameFormDialog(
                         placeholder = "Describe brevemente el juego..."
                     )
 
-                    // Campo URL de imagen (manual)
                     GameVaultTextField(
                         value = uiState.coverImageUrl,
                         onValueChange = { viewModel.handleEvent(GameFormEvent.CoverImageUrlChanged(it)) },
@@ -143,7 +135,6 @@ fun GameFormDialog(
                         placeholder = "https://ejemplo.com/imagen.jpg"
                     )
 
-                    // Selector de Estado
                     Text(
                         text = "Estado",
                         style = MaterialTheme.typography.labelLarge,
@@ -185,7 +176,6 @@ fun GameFormDialog(
                         )
                     }
 
-                    // Mensaje de error
                     if (uiState.errorMessage != null) {
                         Text(
                             text = uiState.errorMessage!!,

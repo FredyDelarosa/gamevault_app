@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GameVault</string>
+    <string name="dashboard">Now Playing</string>
+    <string name="backlog">Backlog</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="register">Registrarse</string>
+    <string name="logout">Cerrar Sesión</string>
+</resources>

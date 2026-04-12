@@ -57,7 +57,11 @@ fun GameVaultApp(
 
     Scaffold(
         bottomBar = {
-            if (isLoggedIn && currentRoute in setOf(Screen.Dashboard.route, Screen.Backlog.route)) {
+            if (isLoggedIn && currentRoute in setOf(
+                    Screen.Dashboard.route,
+                    Screen.Backlog.route,
+                    Screen.Wishlist.route
+                )) {
                 GameVaultBottomBar(
                     navController = navController,
                     onNavigateToDashboard = {
@@ -70,6 +74,14 @@ fun GameVaultApp(
                     },
                     onNavigateToBacklog = {
                         navController.navigate(Screen.Backlog.route) {
+                            popUpTo(Screen.Dashboard.route) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToWishlist = {
+                        navController.navigate(Screen.Wishlist.route) {
                             popUpTo(Screen.Dashboard.route) {
                                 inclusive = false
                             }

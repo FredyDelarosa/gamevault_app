@@ -2,6 +2,7 @@ package com.fredy.gamevault.core.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import com.fredy.gamevault.features.auth.presentation.screens.LoginScreen
 import com.fredy.gamevault.features.auth.presentation.screens.RegisterScreen
 import com.fredy.gamevault.features.backlog.presentation.screen.BacklogScreen
 import com.fredy.gamevault.features.dashboard.presentation.screen.DashboardScreen
+import com.fredy.gamevault.features.wishlist.presentation.screen.WishlistScreen
 
 @Composable
 fun NavGraph(
@@ -84,8 +86,11 @@ fun NavGraph(
         }
 
         composable(Screen.Backlog.route) {
-            BacklogScreen(
-            )
+            BacklogScreen()
+        }
+
+        composable(Screen.Wishlist.route) {
+            WishlistScreen()
         }
     }
 }
@@ -94,14 +99,16 @@ fun NavGraph(
 fun GameVaultBottomBar(
     navController: NavHostController,
     onNavigateToDashboard: () -> Unit,
-    onNavigateToBacklog: () -> Unit
+    onNavigateToBacklog: () -> Unit,
+    onNavigateToWishlist: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     val items = listOf(
         BottomNavItem.Dashboard,
-        BottomNavItem.Backlog
+        BottomNavItem.Backlog,
+        BottomNavItem.Wishlist
     )
 
     NavigationBar(
@@ -123,6 +130,7 @@ fun GameVaultBottomBar(
                     when (item.route) {
                         Screen.Dashboard.route -> onNavigateToDashboard()
                         Screen.Backlog.route -> onNavigateToBacklog()
+                        Screen.Wishlist.route -> onNavigateToWishlist()
                     }
                 }
             )
@@ -145,5 +153,11 @@ sealed class BottomNavItem(
         route = Screen.Backlog.route,
         icon = Icons.AutoMirrored.Filled.List,
         label = "Backlog"
+    )
+
+    object Wishlist : BottomNavItem(
+        route = Screen.Wishlist.route,
+        icon = Icons.Default.FavoriteBorder,
+        label = "Wishlist"
     )
 }

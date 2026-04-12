@@ -1,6 +1,7 @@
 package com.fredy.gamevault.core.network
 
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.AuthResponse
+import com.fredy.gamevault.features.auth.data.datasources.remote.model.FcmTokenRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.LoginRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.RegisterRequest
 import com.fredy.gamevault.features.games.data.datasources.remote.model.GameDto
@@ -30,4 +31,7 @@ interface GameVaultApi {
 
     @DELETE("games/{id}")
     suspend fun deleteGame(@Path("id") id: String): GenericResponse
+
+    @POST("notifications/token")
+    suspend fun saveFcmToken(@Body request: FcmTokenRequest): GenericResponse
 }

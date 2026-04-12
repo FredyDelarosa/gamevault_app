@@ -2,13 +2,16 @@ package com.fredy.gamevault.features.auth.data.repositories
 
 import com.fredy.gamevault.core.network.GameVaultApi
 import com.fredy.gamevault.core.session.SessionManager
+import com.fredy.gamevault.core.worker.SyncScheduler
 import com.fredy.gamevault.features.auth.data.datasources.remote.mapper.toDomain
+import com.fredy.gamevault.features.auth.data.datasources.remote.model.FcmTokenRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.LoginRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.RegisterRequest
 import com.fredy.gamevault.features.auth.domain.entities.User
 import com.fredy.gamevault.features.auth.domain.repositories.AuthRepository
-import com.fredy.gamevault.core.worker.SyncScheduler
 import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -29,6 +32,9 @@ class AuthRepositoryImpl @Inject constructor(
 
             sessionManager.saveAuthToken(token)
             sessionManager.saveUserSession(user.id, user.email, user.firstName, user.lastName)
+
+            // Enviar token FCM al backend después del login exitoso
+            sendFcmTokenToServer()
 
             Result.success(Pair(user, token))
         } catch (e: Exception) {
@@ -53,8 +59,24 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        // Cancelar sincronización programada al cerrar sesión
         syncScheduler.cancelAllSync()
         sessionManager.clearSession()
+    }
+
+    /**
+     * Obtiene el token FCM del dispositivo y lo envía al backend.
+     * Esto permite que el servidor envíe push notifications a este dispositivo.
+     */
+    private suspend fun sendFcmTokenToServer() {
+        try {
+            val fcmToken = FirebaseMessaging.getInstance().token.await()
+            Log.d(TAG, "Token FCM obtenido: ${fcmToken.take(20)}...")
+
+            api.saveFcmToken(FcmTokenRequest(fcmToken))
+            Log.d(TAG, "Token FCM enviado al servidor exitosamente")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error enviando token FCM: ${e.message}")
+            // No fallar el login si el token FCM no se puede enviar
+        }
     }
 }

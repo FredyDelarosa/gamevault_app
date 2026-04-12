@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.fredy.gamevault.core.notifications.NotificationChannelManager
 import com.fredy.gamevault.core.worker.SyncScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -17,6 +18,9 @@ class GameVaultApp : Application(), Configuration.Provider {
     @Inject
     lateinit var syncScheduler: SyncScheduler
 
+    @Inject
+    lateinit var notificationChannelManager: NotificationChannelManager
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -26,14 +30,13 @@ class GameVaultApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        // Programar sincronización periódica con WorkManager
-        // Reemplaza el CoroutineScope anterior, respetando batería y conectividad
-        syncScheduler.schedulePeriodicSync()
+        // Crear canales de notificación para FCM
+        notificationChannelManager.createNotificationChannels()
 
-        // Disparar una sincronización inmediata al abrir la app
-        // para sincronizar juegos pendientes lo antes posible
+        // Programar sincronización periódica con WorkManager
+        syncScheduler.schedulePeriodicSync()
         syncScheduler.requestImmediateSync()
 
-        Log.d("GameVaultApp", "WorkManager inicializado y sincronización programada")
+        Log.d("GameVaultApp", "App inicializada: canales de notificación y WorkManager configurados")
     }
 }

@@ -11,6 +11,7 @@ import com.fredy.gamevault.features.games.data.datasources.remote.mapper.toDto
 import com.fredy.gamevault.features.games.domain.entities.Game
 import com.fredy.gamevault.features.games.domain.entities.GameStatus
 import com.fredy.gamevault.features.games.domain.repositories.GameRepository
+import com.fredy.gamevault.core.worker.SyncScheduler
 import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import javax.inject.Inject
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class GameRepositoryImpl @Inject constructor(
     private val api: GameVaultApi,
     private val gameDao: GameDao,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val syncScheduler: SyncScheduler
 ) : GameRepository {
 
     override suspend fun getGames(status: GameStatus?): Result<List<Game>> {
@@ -120,6 +122,10 @@ class GameRepositoryImpl @Inject constructor(
                 updatedAt = java.time.Instant.now().toString()
             )
             gameDao.insertGame(localGame.toEntity(isSynced = false))
+
+            // Solicitar sincronización con WorkManager cuando hay datos pendientes
+            syncScheduler.requestImmediateSync()
+
             Result.success(localGame)
         }
     }
@@ -173,6 +179,10 @@ class GameRepositoryImpl @Inject constructor(
                 ).toDomain()
 
                 gameDao.updateGame(updatedGame.toEntity(isSynced = false))
+
+                // Solicitar sincronización con WorkManager cuando hay datos pendientes
+                syncScheduler.requestImmediateSync()
+
                 Result.success(updatedGame)
             } else {
                 Result.failure(e)
@@ -223,7 +233,8 @@ class GameRepositoryImpl @Inject constructor(
                     }
                     gameDao.insertGame(createdGame.toEntity(isSynced = true))
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                android.util.Log.e("SyncDebug", "Error sincronizando juego ${gameEntity.id}: ${e.message}", e)
             }
         }
         return Result.success(Unit)

@@ -7,12 +7,14 @@ import com.fredy.gamevault.features.auth.data.datasources.remote.model.LoginRequ
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.RegisterRequest
 import com.fredy.gamevault.features.auth.domain.entities.User
 import com.fredy.gamevault.features.auth.domain.repositories.AuthRepository
+import com.fredy.gamevault.core.worker.SyncScheduler
 import android.util.Log
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val api: GameVaultApi,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val syncScheduler: SyncScheduler
 ) : AuthRepository {
 
     companion object {
@@ -51,6 +53,8 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
+        // Cancelar sincronización programada al cerrar sesión
+        syncScheduler.cancelAllSync()
         sessionManager.clearSession()
     }
 }

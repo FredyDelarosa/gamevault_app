@@ -26,6 +26,8 @@ import com.fredy.gamevault.features.games.domain.entities.Game
 import com.fredy.gamevault.features.wishlist.presentation.WishlistEvent
 import com.fredy.gamevault.features.wishlist.presentation.WishlistUiState
 import com.fredy.gamevault.features.wishlist.presentation.viewmodels.WishlistViewModel
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,23 +140,22 @@ private fun WishlistGameCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp),
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 MaterialTheme.colorScheme.secondaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surfaceVariant
             }
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Cover Image
@@ -162,24 +163,23 @@ private fun WishlistGameCard(
                 model = game.coverImageUrl.takeIf { it.isNotBlank() },
                 contentDescription = game.name,
                 modifier = Modifier
-                    .size(96.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop
             )
 
             // Game Info
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.Start
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = game.name,
                     style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (game.description.isNotBlank()) {
@@ -199,9 +199,10 @@ private fun WishlistGameCard(
                     Button(
                         onClick = onMoveToBacklog,
                         modifier = Modifier
-                            .height(32.dp)
+                            .height(34.dp)
                             .weight(1f),
-                        contentPadding = PaddingValues(4.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "A Backlog",
@@ -211,13 +212,13 @@ private fun WishlistGameCard(
 
                     IconButton(
                         onClick = onDelete,
-                        modifier = Modifier
-                            .size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -235,23 +236,24 @@ private fun EmptyWishlistContent(
             .fillMaxWidth()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.Add,
+            imageVector = Icons.Default.FavoriteBorder,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.outline
+            modifier = Modifier.size(72.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         )
 
         Text(
             text = "Tu Wishlist está vacía",
             style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
 
         Text(
-            text = "Agrega juegos que deseas jugar",
+            text = "Los juegos que deseas jugar\naparecerán aquí",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

@@ -3,9 +3,11 @@ package com.fredy.gamevault.core.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,12 +31,26 @@ fun GameVaultTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label) },
-            placeholder = { Text(placeholder) },
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            },
             isError = isError,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
+            ),
+            singleLine = true
         )
         if (isError && errorMessage != null) {
             Text(

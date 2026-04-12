@@ -29,6 +29,7 @@ import com.fredy.gamevault.core.hardware.HapticFeedback
 import com.fredy.gamevault.features.dashboard.presentation.viewmodels.DashboardViewModel
 import com.fredy.gamevault.features.games.domain.entities.Game
 import com.fredy.gamevault.features.games.presentation.components.GameFormDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -227,90 +228,125 @@ fun DashboardGameCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = MaterialTheme.shapes.medium,
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = game.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f)
-                )
-
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
+            // Cover image con overlay
             if (game.coverImageUrl.isNotBlank()) {
-                AsyncImage(
-                    model = game.coverImageUrl,
-                    contentDescription = "Portada de ${game.name}",
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp)
-                        .padding(vertical = 8.dp),
-                    contentScale = ContentScale.Crop
-                )
+                        .height(160.dp)
+                ) {
+                    AsyncImage(
+                        model = game.coverImageUrl,
+                        contentDescription = "Portada de ${game.name}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    // Botón de editar sobre la imagen
+                    IconButton(
+                        onClick = onEdit,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
             }
 
-            Text(
-                text = game.description,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Button(
-                    onClick = onComplete,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Completar")
+                    Text(
+                        text = game.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (game.coverImageUrl.isBlank()) {
+                        IconButton(onClick = onEdit) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
 
-                Button(
-                    onClick = onMoveToBacklog,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
+                if (game.description.isNotBlank()) {
+                    Text(
+                        text = game.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
-                ) {
-                    Text("Backlog")
                 }
 
-                OutlinedButton(
-                    onClick = onDelete,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Eliminar")
+                    Button(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Completar", style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    OutlinedButton(
+                        onClick = onMoveToBacklog,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Backlog", style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    OutlinedButton(
+                        onClick = onDelete,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Eliminar", style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
         }

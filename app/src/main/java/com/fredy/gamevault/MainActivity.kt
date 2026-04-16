@@ -60,31 +60,32 @@ fun GameVaultApp(
             if (isLoggedIn && currentRoute in setOf(
                     Screen.Dashboard.route,
                     Screen.Backlog.route,
-                    Screen.Wishlist.route
+                    Screen.Wishlist.route,
+                    Screen.Feed.route
                 )) {
                 GameVaultBottomBar(
                     navController = navController,
                     onNavigateToDashboard = {
                         navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.Dashboard.route) {
-                                inclusive = false
-                            }
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
                     },
                     onNavigateToBacklog = {
                         navController.navigate(Screen.Backlog.route) {
-                            popUpTo(Screen.Dashboard.route) {
-                                inclusive = false
-                            }
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
                     },
                     onNavigateToWishlist = {
                         navController.navigate(Screen.Wishlist.route) {
-                            popUpTo(Screen.Dashboard.route) {
-                                inclusive = false
-                            }
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToFeed = {
+                        navController.navigate(Screen.Feed.route) {
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
                     }

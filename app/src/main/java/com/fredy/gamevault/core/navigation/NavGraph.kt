@@ -3,6 +3,7 @@ package com.fredy.gamevault.core.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,8 @@ import com.fredy.gamevault.core.session.SessionManager
 import com.fredy.gamevault.features.auth.presentation.screens.LoginScreen
 import com.fredy.gamevault.features.auth.presentation.screens.RegisterScreen
 import com.fredy.gamevault.features.backlog.presentation.screen.BacklogScreen
+import com.fredy.gamevault.features.community.presentation.screen.CreatePostScreen
+import com.fredy.gamevault.features.community.presentation.screen.FeedScreen
 import com.fredy.gamevault.features.dashboard.presentation.screen.DashboardScreen
 import com.fredy.gamevault.features.wishlist.presentation.screen.WishlistScreen
 
@@ -55,9 +58,7 @@ fun NavGraph(
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onNavigateToRegister = {
-                    navController.navigate(Screen.Register.route)
-                },
+                onNavigateToRegister = { navController.navigate(Screen.Register.route) },
                 onLoginSuccess = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -65,32 +66,27 @@ fun NavGraph(
                 }
             )
         }
-
         composable(Screen.Register.route) {
             RegisterScreen(
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                },
-                onRegisterSuccess = {
-                    navController.popBackStack()
-                }
+                onNavigateToLogin = { navController.popBackStack() },
+                onRegisterSuccess = { navController.popBackStack() }
             )
         }
-
         composable(Screen.Dashboard.route) {
-            DashboardScreen(
-                onLogout = {
-                    shouldLogout = true
-                }
+            DashboardScreen(onLogout = { shouldLogout = true })
+        }
+        composable(Screen.Backlog.route) { BacklogScreen() }
+        composable(Screen.Wishlist.route) { WishlistScreen() }
+        composable(Screen.Feed.route) {
+            FeedScreen(
+                onCreatePost = { navController.navigate(Screen.CreatePost.route) }
             )
         }
-
-        composable(Screen.Backlog.route) {
-            BacklogScreen()
-        }
-
-        composable(Screen.Wishlist.route) {
-            WishlistScreen()
+        composable(Screen.CreatePost.route) {
+            CreatePostScreen(
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
         }
     }
 }
@@ -100,7 +96,8 @@ fun GameVaultBottomBar(
     navController: NavHostController,
     onNavigateToDashboard: () -> Unit,
     onNavigateToBacklog: () -> Unit,
-    onNavigateToWishlist: () -> Unit
+    onNavigateToWishlist: () -> Unit,
+    onNavigateToFeed: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -108,7 +105,8 @@ fun GameVaultBottomBar(
     val items = listOf(
         BottomNavItem.Dashboard,
         BottomNavItem.Backlog,
-        BottomNavItem.Wishlist
+        BottomNavItem.Wishlist,
+        BottomNavItem.Feed
     )
 
     NavigationBar(
@@ -118,12 +116,7 @@ fun GameVaultBottomBar(
     ) {
         items.forEach { item ->
             NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label
-                    )
-                },
+                icon = { Icon(imageVector = item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },
                 selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
@@ -131,6 +124,7 @@ fun GameVaultBottomBar(
                         Screen.Dashboard.route -> onNavigateToDashboard()
                         Screen.Backlog.route -> onNavigateToBacklog()
                         Screen.Wishlist.route -> onNavigateToWishlist()
+                        Screen.Feed.route -> onNavigateToFeed()
                     }
                 }
             )
@@ -143,21 +137,8 @@ sealed class BottomNavItem(
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
     val label: String
 ) {
-    object Dashboard : BottomNavItem(
-        route = Screen.Dashboard.route,
-        icon = Icons.Default.PlayArrow,
-        label = "Now Playing"
-    )
-
-    object Backlog : BottomNavItem(
-        route = Screen.Backlog.route,
-        icon = Icons.AutoMirrored.Filled.List,
-        label = "Backlog"
-    )
-
-    object Wishlist : BottomNavItem(
-        route = Screen.Wishlist.route,
-        icon = Icons.Default.FavoriteBorder,
-        label = "Wishlist"
-    )
+    object Dashboard : BottomNavItem(Screen.Dashboard.route, Icons.Default.PlayArrow, "Playing")
+    object Backlog : BottomNavItem(Screen.Backlog.route, Icons.AutoMirrored.Filled.List, "Backlog")
+    object Wishlist : BottomNavItem(Screen.Wishlist.route, Icons.Default.FavoriteBorder, "Wishlist")
+    object Feed : BottomNavItem(Screen.Feed.route, Icons.Default.Forum, "Feed")
 }

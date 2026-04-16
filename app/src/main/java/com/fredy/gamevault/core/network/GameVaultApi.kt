@@ -4,6 +4,8 @@ import com.fredy.gamevault.features.auth.data.datasources.remote.model.AuthRespo
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.FcmTokenRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.LoginRequest
 import com.fredy.gamevault.features.auth.data.datasources.remote.model.RegisterRequest
+import com.fredy.gamevault.features.community.data.datasources.remote.model.CreatePostRequest
+import com.fredy.gamevault.features.community.data.datasources.remote.model.PostResponse
 import com.fredy.gamevault.features.games.data.datasources.remote.model.GameDto
 import com.fredy.gamevault.features.games.data.datasources.remote.model.GameResponse
 import com.fredy.gamevault.features.shared.model.GenericResponse
@@ -34,4 +36,29 @@ interface GameVaultApi {
 
     @POST("notifications/token")
     suspend fun saveFcmToken(@Body request: FcmTokenRequest): GenericResponse
+
+    // Community / Posts
+    @POST("posts")
+    suspend fun createPost(@Body request: CreatePostRequest): PostResponse
+
+    @GET("posts")
+    suspend fun getAllPosts(
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): List<PostResponse>
+
+    @GET("posts/my-games")
+    suspend fun getPostsForMyGames(
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): List<PostResponse>
+
+    @GET("posts/{id}")
+    suspend fun getPostById(@Path("id") id: String): PostResponse
+
+    @DELETE("posts/{id}")
+    suspend fun deletePost(@Path("id") id: String): GenericResponse
+
+    @POST("posts/{id}/react")
+    suspend fun reactToPost(@Path("id") id: String): GenericResponse
 }

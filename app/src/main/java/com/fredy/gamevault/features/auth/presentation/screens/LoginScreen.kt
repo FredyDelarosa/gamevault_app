@@ -15,9 +15,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +39,8 @@ fun LoginScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     var useBiometric by remember { mutableStateOf(false) }
     var showBiometricDialog by remember { mutableStateOf(false) }
     var hasSavedSession by remember { mutableStateOf(false) }
@@ -52,6 +53,23 @@ fun LoginScreen(
             showBiometricDialog = shouldAutoPrompt
             hasSavedSession = hasSession
         }
+    }
+
+    fun validate(): Boolean {
+        var valid = true
+        emailError = when {
+            email.isBlank() -> { valid = false; "El correo es requerido" }
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                valid = false; "Ingresa un correo válido"
+            }
+            else -> null
+        }
+        passwordError = when {
+            password.isBlank() -> { valid = false; "La contraseña es requerida" }
+            password.length < 6 -> { valid = false; "Mínimo 6 caracteres" }
+            else -> null
+        }
+        return valid
     }
 
     if (showBiometricDialog) {
@@ -81,14 +99,11 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
-            // Logo / Icono
             Box(
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(
-                        Brush.linearGradient(listOf(GradientPurple, GradientCyan))
-                    ),
+                    .background(Brush.linearGradient(listOf(GradientPurple, GradientCyan))),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -107,7 +122,6 @@ fun LoginScreen(
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary
             )
-
             Text(
                 text = "Tu biblioteca de juegos, organizada",
                 style = MaterialTheme.typography.bodyMedium,
@@ -117,21 +131,32 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Formulario
             GameVaultTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    if (emailError != null) emailError = null
+                },
                 label = "Correo electrónico",
-                placeholder = "ejemplo@correo.com"
+                placeholder = "ejemplo@correo.com",
+                keyboardType = KeyboardType.Email,
+                isError = emailError != null,
+                errorMessage = emailError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             GameVaultTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    if (passwordError != null) passwordError = null
+                },
                 label = "Contraseña",
-                placeholder = "••••••••"
+                placeholder = "••••••••",
+                isPassword = true,
+                isError = passwordError != null,
+                errorMessage = passwordError
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -158,18 +183,14 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Errores
-            val authError = uiState.error
-            if (authError != null) {
+            uiState.error?.let { error ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = authError,
+                        text = error,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(12.dp)
@@ -191,12 +212,14 @@ fun LoginScreen(
                 text = "Iniciar Sesión",
                 isLoading = uiState.isLoading,
                 onClick = {
-                    viewModel.login(
-                        email = email,
-                        password = password,
-                        onSuccess = { onLoginSuccess() },
-                        useBiometric = useBiometric
-                    )
+                    if (validate()) {
+                        viewModel.login(
+                            email = email.trim(),
+                            password = password,
+                            onSuccess = { onLoginSuccess() },
+                            useBiometric = useBiometric
+                        )
+                    }
                 }
             )
 
@@ -226,13 +249,9 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text(
-                        "Configurar acceso con huella",
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text("Configurar acceso con huella", fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }

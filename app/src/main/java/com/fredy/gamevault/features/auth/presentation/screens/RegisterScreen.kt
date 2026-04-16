@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +34,12 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var firstNameError by remember { mutableStateOf<String?>(null) }
+    var lastNameError by remember { mutableStateOf<String?>(null) }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
@@ -40,6 +47,33 @@ fun RegisterScreen(
         if (uiState.successMessage != null) {
             onRegisterSuccess()
         }
+    }
+
+    fun validate(): Boolean {
+        var valid = true
+        firstNameError = when {
+            firstName.isBlank() -> { valid = false; "El nombre es requerido" }
+            firstName.length < 2 -> { valid = false; "Mínimo 2 caracteres" }
+            else -> null
+        }
+        lastNameError = when {
+            lastName.isBlank() -> { valid = false; "El apellido es requerido" }
+            lastName.length < 2 -> { valid = false; "Mínimo 2 caracteres" }
+            else -> null
+        }
+        emailError = when {
+            email.isBlank() -> { valid = false; "El correo es requerido" }
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                valid = false; "Ingresa un correo válido"
+            }
+            else -> null
+        }
+        passwordError = when {
+            password.isBlank() -> { valid = false; "La contraseña es requerida" }
+            password.length < 6 -> { valid = false; "Mínimo 6 caracteres" }
+            else -> null
+        }
+        return valid
     }
 
     Box(
@@ -56,14 +90,11 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
-            // Icono
             Box(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.linearGradient(listOf(GradientPink, GradientCyan))
-                    ),
+                    .background(Brush.linearGradient(listOf(GradientPink, GradientCyan))),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -82,7 +113,6 @@ fun RegisterScreen(
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary
             )
-
             Text(
                 text = "Comienza a organizar tu colección",
                 style = MaterialTheme.typography.bodyMedium,
@@ -98,16 +128,26 @@ fun RegisterScreen(
             ) {
                 GameVaultTextField(
                     value = firstName,
-                    onValueChange = { firstName = it },
+                    onValueChange = {
+                        firstName = it
+                        if (firstNameError != null) firstNameError = null
+                    },
                     label = "Nombre",
                     placeholder = "Tu nombre",
+                    isError = firstNameError != null,
+                    errorMessage = firstNameError,
                     modifier = Modifier.weight(1f)
                 )
                 GameVaultTextField(
                     value = lastName,
-                    onValueChange = { lastName = it },
+                    onValueChange = {
+                        lastName = it
+                        if (lastNameError != null) lastNameError = null
+                    },
                     label = "Apellido",
                     placeholder = "Tu apellido",
+                    isError = lastNameError != null,
+                    errorMessage = lastNameError,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -116,18 +156,30 @@ fun RegisterScreen(
 
             GameVaultTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    if (emailError != null) emailError = null
+                },
                 label = "Correo electrónico",
-                placeholder = "ejemplo@correo.com"
+                placeholder = "ejemplo@correo.com",
+                keyboardType = KeyboardType.Email,
+                isError = emailError != null,
+                errorMessage = emailError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             GameVaultTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    if (passwordError != null) passwordError = null
+                },
                 label = "Contraseña",
-                placeholder = "Mínimo 6 caracteres"
+                placeholder = "Mínimo 6 caracteres",
+                isPassword = true,
+                isError = passwordError != null,
+                errorMessage = passwordError
             )
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -135,9 +187,7 @@ fun RegisterScreen(
             uiState.error?.let { error ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
@@ -153,7 +203,17 @@ fun RegisterScreen(
             GameVaultButton(
                 text = "Registrarme",
                 isLoading = uiState.isLoading,
-                onClick = { viewModel.register(email, password, firstName, lastName, onRegisterSuccess) }
+                onClick = {
+                    if (validate()) {
+                        viewModel.register(
+                            email = email.trim(),
+                            password = password,
+                            firstName = firstName.trim(),
+                            lastName = lastName.trim(),
+                            onSuccess = onRegisterSuccess
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -118,21 +118,27 @@ fun GameFormDialog(
                         onValueChange = { viewModel.handleEvent(GameFormEvent.NameChanged(it)) },
                         label = "Nombre del juego *",
                         placeholder = "Ej: The Legend of Zelda",
-                        isError = uiState.errorMessage != null && uiState.name.isBlank()
+                        isError = uiState.errorMessage != null && uiState.name.isBlank(),
+                        errorMessage = if (uiState.errorMessage != null && uiState.name.isBlank())
+                            "El nombre es requerido" else null
                     )
 
                     GameVaultTextField(
                         value = uiState.description,
                         onValueChange = { viewModel.handleEvent(GameFormEvent.DescriptionChanged(it)) },
                         label = "Descripción",
-                        placeholder = "Describe brevemente el juego..."
+                        placeholder = "Describe brevemente el juego...",
+                        singleLine = false,
+                        maxLines = 4,
+                        minHeight = 80
                     )
 
                     GameVaultTextField(
                         value = uiState.coverImageUrl,
                         onValueChange = { viewModel.handleEvent(GameFormEvent.CoverImageUrlChanged(it)) },
                         label = "URL de la portada (opcional)",
-                        placeholder = "https://ejemplo.com/imagen.jpg"
+                        placeholder = "https://ejemplo.com/imagen.jpg",
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Uri
                     )
 
                     Text(

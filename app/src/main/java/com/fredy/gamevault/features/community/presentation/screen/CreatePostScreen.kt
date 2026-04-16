@@ -1,6 +1,8 @@
 package com.fredy.gamevault.features.community.presentation.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,10 +32,28 @@ fun CreatePostScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scroll = rememberScrollState()
 
+    var gameNameError by remember { mutableStateOf<String?>(null) }
+    var titleError by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
             onSuccess()
         }
+    }
+
+    fun validate(): Boolean {
+        var valid = true
+        gameNameError = when {
+            uiState.gameName.isBlank() -> { valid = false; "El nombre del juego es requerido" }
+            uiState.gameName.length < 2 -> { valid = false; "Mínimo 2 caracteres" }
+            else -> null
+        }
+        titleError = when {
+            uiState.title.isBlank() -> { valid = false; "El título es requerido" }
+            uiState.title.length < 3 -> { valid = false; "Mínimo 3 caracteres" }
+            else -> null
+        }
+        return valid
     }
 
     Scaffold(
@@ -52,10 +72,11 @@ fun CreatePostScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp)
+                .padding(horizontal = 24.dp)
                 .verticalScroll(scroll)
         ) {
-            // Tipo de publicación
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = "Tipo de publicación",
                 style = MaterialTheme.typography.labelLarge,
@@ -63,21 +84,23 @@ fun CreatePostScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Row(
+            // LazyRow scrollable horizontal: cada chip muestra su texto completo
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
             ) {
-                PostType.values().forEach { type ->
+                items(PostType.values()) { type ->
                     FilterChip(
                         selected = uiState.postType == type,
                         onClick = { viewModel.handleEvent(CreatePostEvent.TypeChanged(type)) },
                         label = {
                             Text(
-                                type.displayName(),
-                                style = MaterialTheme.typography.labelSmall
+                                text = type.displayName(),
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1
                             )
-                        },
-                        modifier = Modifier.weight(1f)
+                        }
                     )
                 }
             }
@@ -86,32 +109,40 @@ fun CreatePostScreen(
 
             GameVaultTextField(
                 value = uiState.gameName,
-                onValueChange = { viewModel.handleEvent(CreatePostEvent.GameNameChanged(it)) },
-                label = "Juego *",
-                placeholder = "Ej: ARK, Minecraft, Zelda..."
+                onValueChange = {
+                    viewModel.handleEvent(CreatePostEvent.GameNameChanged(it))
+                    if (gameNameError != null) gameNameError = null
+                },
+                label = "Juego",
+                placeholder = "Ej: ARK, Minecraft, Zelda...",
+                isError = gameNameError != null,
+                errorMessage = gameNameError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             GameVaultTextField(
                 value = uiState.title,
-                onValueChange = { viewModel.handleEvent(CreatePostEvent.TitleChanged(it)) },
-                label = "Título *",
-                placeholder = "Ej: Cómo domesticar un T-Rex fácil"
+                onValueChange = {
+                    viewModel.handleEvent(CreatePostEvent.TitleChanged(it))
+                    if (titleError != null) titleError = null
+                },
+                label = "Título",
+                placeholder = "Ej: Cómo domesticar un T-Rex fácil",
+                isError = titleError != null,
+                errorMessage = titleError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            GameVaultTextField(
                 value = uiState.content,
                 onValueChange = { viewModel.handleEvent(CreatePostEvent.ContentChanged(it)) },
-                label = { Text("Contenido") },
-                placeholder = { Text("Comparte los detalles...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 120.dp),
-                shape = RoundedCornerShape(14.dp),
-                maxLines = 10
+                label = "Contenido",
+                placeholder = "Comparte los detalles...",
+                singleLine = false,
+                maxLines = 8,
+                minHeight = 140
             )
 
             uiState.errorMessage?.let { error ->
@@ -119,7 +150,8 @@ fun CreatePostScreen(
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = error,
@@ -135,8 +167,14 @@ fun CreatePostScreen(
             GameVaultButton(
                 text = "Publicar",
                 isLoading = uiState.isLoading,
-                onClick = { viewModel.handleEvent(CreatePostEvent.Submit) }
+                onClick = {
+                    if (validate()) {
+                        viewModel.handleEvent(CreatePostEvent.Submit)
+                    }
+                }
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
